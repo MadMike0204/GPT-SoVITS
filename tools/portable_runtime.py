@@ -1,8 +1,9 @@
-"""Runtime initialization for the bundled GPT-SoVITS environment."""
+"""初始化当前 Python 环境，兼容本地 .venv 与整合包 runtime。"""
 
 from __future__ import annotations
 
 import os
+import shutil
 import sys
 from importlib import import_module
 from importlib.machinery import ModuleSpec
@@ -13,9 +14,23 @@ from types import ModuleType
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RUNTIME_DIR = PROJECT_ROOT / "runtime"
-SITE_PACKAGES = RUNTIME_DIR / "Lib" / "site-packages"
-FFMPEG_EXE = RUNTIME_DIR / "ffmpeg.exe"
-FFPROBE_EXE = RUNTIME_DIR / "ffprobe.exe"
+# venv 的解释器位于 Scripts，依赖则位于 sys.prefix/Lib/site-packages。
+ENV_DIR = Path(sys.prefix)
+SITE_PACKAGES = ENV_DIR / "Lib" / "site-packages"
+
+
+def _find_executable(name: str) -> Path:
+    """优先复用当前环境和项目工具，再查找系统 PATH。"""
+    filename = name + (".exe" if os.name == "nt" else "")
+    for directory in (Path(sys.executable).parent, ENV_DIR, RUNTIME_DIR, PROJECT_ROOT):
+        candidate = directory / filename
+        if candidate.is_file():
+            return candidate
+    return Path(shutil.which(name) or filename)
+
+
+FFMPEG_EXE = _find_executable("ffmpeg")
+FFPROBE_EXE = _find_executable("ffprobe")
 _DLL_HANDLES = []
 _DLL_READY = False
 _ACTIVE = False
@@ -28,6 +43,7 @@ def _prepare_dlls() -> None:
     if _DLL_READY or os.name != "nt":
         return
     directories = [
+        ENV_DIR,
         RUNTIME_DIR,
         SITE_PACKAGES / "torch" / "lib",
         PROJECT_ROOT / "GPT_SoVITS" / "Accel" / "vendor" / "cuda" / "bin",
@@ -84,9 +100,15 @@ def activate(*, change_cwd: bool = False) -> None:
     if not _ACTIVE:
         sys.path.insert(0, str(PROJECT_ROOT))
         sys.path.insert(0, str(PROJECT_ROOT / "GPT_SoVITS"))
-        os.environ["PATH"] = str(RUNTIME_DIR) + os.pathsep + os.environ.get("PATH", "")
+        os.environ["PATH"] = os.pathsep.join(
+            (str(Path(sys.executable).parent), str(RUNTIME_DIR), os.environ.get("PATH", ""))
+        )
         os.environ.setdefault("G2PW", "0")
-        os.environ["NLTK_DATA"] = str(RUNTIME_DIR / "nltk_data")
+        # 允许调用方指定数据目录，并兼容整合包已有的数据。
+        nltk_dir = ENV_DIR / "nltk_data"
+        if not nltk_dir.is_dir() and (RUNTIME_DIR / "nltk_data").is_dir():
+            nltk_dir = RUNTIME_DIR / "nltk_data"
+        os.environ.setdefault("NLTK_DATA", str(nltk_dir))
         try:
             import _distutils_hack
             _distutils_hack.add_shim()

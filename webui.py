@@ -190,6 +190,7 @@ for key in pretrained_gpt_name.keys():
         pretrained_gpt_name[key] = ""
 
 from config import (
+    WEIGHTS_ROOT,
     GPT_weight_root,
     GPT_weight_version2root,
     SoVITS_weight_root,
@@ -1704,7 +1705,11 @@ with gr.Blocks(title="GPT-SoVITS WebUI", analytics_enabled=False, js=js, css=css
             button1abc_close.click(close1abc, [], [info1abc, button1abc_open, button1abc_close])
 
             with gr.TabItem("1B-" + i18n("微调训练")):
-                with gr.Accordion(label="1Ba-" + i18n("SoVITS 训练: 模型权重文件在 SoVITS_weights/")):
+                with gr.Accordion(
+                    label="1Ba-" + i18n("SoVITS 训练: 模型权重文件在 SoVITS_weights/").replace(
+                        "SoVITS_weights", f"{WEIGHTS_ROOT}/SoVITS"
+                    )
+                ):
                     with gr.Row():
                         with gr.Column():
                             with gr.Row():
@@ -1784,7 +1789,11 @@ with gr.Blocks(title="GPT-SoVITS WebUI", analytics_enabled=False, js=js, css=css
                             )
                         with gr.Row():
                             info1Ba = gr.Textbox(label=process_info(process_name_sovits, "info"))
-                with gr.Accordion(label="1Bb-" + i18n("GPT 训练: 模型权重文件在 GPT_weights/")):
+                with gr.Accordion(
+                    label="1Bb-" + i18n("GPT 训练: 模型权重文件在 GPT_weights/").replace(
+                        "GPT_weights", f"{WEIGHTS_ROOT}/GPT"
+                    )
+                ):
                     with gr.Row():
                         with gr.Column():
                             with gr.Row():
@@ -1858,6 +1867,8 @@ with gr.Blocks(title="GPT-SoVITS WebUI", analytics_enabled=False, js=js, css=css
                     value=i18n(
                         "选择训练完存放在SoVITS_weights和GPT_weights下的模型。默认的几个是底模，体验5秒Zero Shot TTS不训练推理用。"
                     )
+                    .replace("SoVITS_weights", f"{WEIGHTS_ROOT}/SoVITS")
+                    .replace("GPT_weights", f"{WEIGHTS_ROOT}/GPT")
                 )
                 with gr.Row():
                     with gr.Column(scale=2):

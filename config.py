@@ -47,51 +47,21 @@ name2gpt_path = {
     ): "GPT_SoVITS/pretrained_models/gsv-v2final-pretrained/s1bert25hz-5kh-longer-epoch=12-step=369668.ckpt",
     i18n("不训练直接推v3底模！"): "GPT_SoVITS/pretrained_models/s1v3.ckpt",
 }
-SoVITS_weight_root = [
-    "SoVITS_weights",
-    "SoVITS_weights_v2",
-    "SoVITS_weights_v3",
-    "SoVITS_weights_v4",
-    "SoVITS_weights_v5dev",
-    "SoVITS_weights_v5turbo",
-    "SoVITS_weights_v2Pro",
-    "SoVITS_weights_v2ProPlus",
-]
-GPT_weight_root = [
-    "GPT_weights",
-    "GPT_weights_v2",
-    "GPT_weights_v3",
-    "GPT_weights_v4",
-    "GPT_weights_v5dev",
-    "GPT_weights_v5turbo",
-    "GPT_weights_v2Pro",
-    "GPT_weights_v2ProPlus",
-]
-SoVITS_weight_version2root = {
-    "v1": "SoVITS_weights",
-    "v2": "SoVITS_weights_v2",
-    "v3": "SoVITS_weights_v3",
-    "v4": "SoVITS_weights_v4",
-    "v5dev": "SoVITS_weights_v5dev",
-    "v5turbo": "SoVITS_weights_v5turbo",
-    "v2Pro": "SoVITS_weights_v2Pro",
-    "v2ProPlus": "SoVITS_weights_v2ProPlus",
+# 训练保存和推理扫描共用一套目录映射，所有版本统一收纳到 Weights。
+WEIGHTS_ROOT = "Weights"
+SoVITS_weight_version2root: dict[str, str] = {
+    version: f"{WEIGHTS_ROOT}/SoVITS/{version}" for version in pretrained_sovits_name
 }
-GPT_weight_version2root = {
-    "v1": "GPT_weights",
-    "v2": "GPT_weights_v2",
-    "v3": "GPT_weights_v3",
-    "v4": "GPT_weights_v4",
-    "v5dev": "GPT_weights_v5dev",
-    "v5turbo": "GPT_weights_v5turbo",
-    "v2Pro": "GPT_weights_v2Pro",
-    "v2ProPlus": "GPT_weights_v2ProPlus",
+GPT_weight_version2root: dict[str, str] = {
+    version: f"{WEIGHTS_ROOT}/GPT/{version}" for version in pretrained_gpt_name
 }
+SoVITS_weight_root: list[str] = list(SoVITS_weight_version2root.values())
+GPT_weight_root: list[str] = list(GPT_weight_version2root.values())
 
 
 def custom_sort_key(s):
     # 使用正则表达式提取字符串中的数字部分和非数字部分
-    parts = re.split("(\d+)", s)
+    parts = re.split(r"(\d+)", s)
     # 将数字部分转换为整数，非数字部分保持不变
     parts = [int(part) if part.isdigit() else part for part in parts]
     return parts

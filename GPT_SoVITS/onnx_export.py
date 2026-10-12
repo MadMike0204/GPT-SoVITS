@@ -390,8 +390,8 @@ if __name__ == "__main__":
     except:
         pass
 
-    gpt_path = "GPT_weights/nahida-e25.ckpt"
-    vits_path = "SoVITS_weights/nahida_e30_s3930.pth"
+    gpt_path = "Weights/GPT/v1/nahida-e25.ckpt"
+    vits_path = "Weights/SoVITS/v1/nahida_e30_s3930.pth"
     exp_path = "nahida"
     export(vits_path, gpt_path, exp_path)
 

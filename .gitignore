@@ -9,6 +9,7 @@ output
 logs
 SoVITS_weights*/
 GPT_weights*/
+Weights/
 TEMP
 weight.json
 ffmpeg*

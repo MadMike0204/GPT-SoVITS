@@ -36,7 +36,8 @@ def _flash_attention_module():
         root = Path(__file__).resolve().parents[1]
         for directory in (
             root / "GPT_SoVITS" / "Accel" / "vendor" / "cuda" / "bin",
-            Path(sys.executable).resolve().parent / "Lib" / "site-packages" / "torch" / "lib",
+            # 标准 venv 的依赖目录不在 Scripts/python.exe 旁边。
+            Path(sys.prefix) / "Lib" / "site-packages" / "torch" / "lib",
         ):
             if directory.is_dir():
                 _DLL_HANDLES.append(os.add_dll_directory(str(directory)))
